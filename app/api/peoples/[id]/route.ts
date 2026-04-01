@@ -2,13 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getTokenFromRequest } from "@/lib/auth";
 
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const user = getTokenFromRequest(req);
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   try {
+    const { id } = await params;
     const all = await prisma.peoples.findMany();
-    const people = all.find((p) => p.PeopleID === parseInt(params.id));
+    const people = all.find((p) => p.PeopleID === parseInt(id));
     if (!people) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
     if (user.role !== "admin" && people.UserID !== user.userId) {
@@ -21,13 +22,14 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
   }
 }
 
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const user = getTokenFromRequest(req);
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   try {
+    const { id } = await params;
     const all = await prisma.peoples.findMany();
-    const people = all.find((p) => p.PeopleID === parseInt(params.id));
+    const people = all.find((p) => p.PeopleID === parseInt(id));
     if (!people) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
     if (user.role !== "admin" && people.UserID !== user.userId) {
@@ -36,7 +38,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
 
     const body = await req.json();
     await prisma.peoples.update({
-      where: { PeopleID: parseInt(params.id) },
+      where: { PeopleID: parseInt(id) },
       data: {
         PeopleCode: body.PeopleCode || null,
         PeopleName: body.PeopleName,
@@ -54,7 +56,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
   }
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const user = getTokenFromRequest(req);
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
@@ -64,7 +66,8 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
   }
 
   try {
-    await prisma.peoples.delete({ where: { PeopleID: parseInt(params.id) } });
+    const { id } = await params;
+    await prisma.peoples.delete({ where: { PeopleID: parseInt(id) } });
     return NextResponse.json({ success: true });
   } catch (err: any) {
     return NextResponse.json({ error: "Server error" }, { status: 500 });

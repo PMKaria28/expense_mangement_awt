@@ -2,11 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getTokenFromRequest } from "@/lib/auth";
 
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const user = getTokenFromRequest(req);
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   try {
+    const { id } = await params;
     const all = await prisma.incomes.findMany({
       include: { categories: true, sub_categories: true, peoples: true, projects: true },
     });
@@ -23,13 +24,14 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
   }
 }
 
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const user = getTokenFromRequest(req);
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   try {
+    const { id } = await params;
     const all = await prisma.incomes.findMany();
-    const income = all.find((i) => i.IncomeID === parseInt(params.id));
+    const income = all.find((i) => i.IncomeID === parseInt(id));
     if (!income) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
     if (user.role !== "admin" && income.UserID !== user.userId) {
@@ -38,7 +40,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
 
     const body = await req.json();
     await prisma.incomes.update({
-      where: { IncomeID: parseInt(params.id) },
+      where: { IncomeID: parseInt(id) },
       data: {
         IncomeDate: new Date(body.IncomeDate),
         CategoryID: body.CategoryID ? parseInt(body.CategoryID) : null,
@@ -59,20 +61,21 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
   }
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const user = getTokenFromRequest(req);
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   try {
+    const { id } = await params;
     const all = await prisma.incomes.findMany();
-    const income = all.find((i) => i.IncomeID === parseInt(params.id));
+    const income = all.find((i) => i.IncomeID === parseInt(id));
     if (!income) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
     if (user.role !== "admin" && income.UserID !== user.userId) {
       return NextResponse.json({ error: "Forbidden — you can only delete your own records" }, { status: 403 });
     }
 
-    await prisma.incomes.delete({ where: { IncomeID: parseInt(params.id) } });
+    await prisma.incomes.delete({ where: { IncomeID: parseInt(id) } });
     return NextResponse.json({ success: true });
   } catch (err: any) {
     return NextResponse.json({ error: "Server error" }, { status: 500 });

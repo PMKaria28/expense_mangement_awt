@@ -2,13 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getTokenFromRequest } from "@/lib/auth";
 
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const user = getTokenFromRequest(req);
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   try {
+    const { id } = await params;
     const all = await prisma.categories.findMany();
-    const category = all.find((c) => c.CategoryID === parseInt(params.id));
+    const category = all.find((c) => c.CategoryID === parseInt(id));
     if (!category) return NextResponse.json({ error: "Not found" }, { status: 404 });
     return NextResponse.json(category);
   } catch (err: any) {
@@ -16,13 +17,14 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
   }
 }
 
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const user = getTokenFromRequest(req);
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   try {
+    const { id } = await params;
     const all = await prisma.categories.findMany();
-    const category = all.find((c) => c.CategoryID === parseInt(params.id));
+    const category = all.find((c) => c.CategoryID === parseInt(id));
     if (!category) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
     if (user.role !== "admin" && category.UserID !== user.userId) {

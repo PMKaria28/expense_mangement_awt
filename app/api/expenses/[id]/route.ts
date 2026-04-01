@@ -2,15 +2,16 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getTokenFromRequest } from "@/lib/auth";
 
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const user = getTokenFromRequest(req);
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   try {
+    const { id } = await params;
     const all = await prisma.expenses.findMany({
       include: { categories: true, sub_categories: true, peoples: true, projects: true },
     });
-    const expense = all.find((e) => e.ExpenseID === parseInt(params.id));
+    const expense = all.find((e) => e.ExpenseID === parseInt(id));
     if (!expense) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
     // Normal user can only view their own
@@ -24,13 +25,14 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
   }
 }
 
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const user = getTokenFromRequest(req);
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   try {
+    const { id } = await params;
     const all = await prisma.expenses.findMany();
-    const expense = all.find((e) => e.ExpenseID === parseInt(params.id));
+    const expense = all.find((e) => e.ExpenseID === parseInt(id));
     if (!expense) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
     // Normal user can only edit their own
@@ -40,7 +42,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
 
     const body = await req.json();
     await prisma.expenses.update({
-      where: { ExpenseID: parseInt(params.id) },
+      where: { ExpenseID: parseInt(id) },
       data: {
         ExpenseDate: new Date(body.ExpenseDate),
         CategoryID: body.CategoryID ? parseInt(body.CategoryID) : null,

@@ -2,13 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getTokenFromRequest } from "@/lib/auth";
 
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const user = getTokenFromRequest(req);
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
+  const { id } = await params;
   const subCategory = await prisma.sub_categories.findFirst({
     where: {
-      SubCategoryID: parseInt(params.id),
+      SubCategoryID: parseInt(id),
       ...(user.role !== "admin" ? { UserID: user.userId } : {}),
     },
     include: { categories: true },
@@ -18,15 +19,16 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
   return NextResponse.json(subCategory);
 }
 
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const user = getTokenFromRequest(req);
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
+  const { id } = await params;
   const body = await req.json();
 
   await prisma.sub_categories.updateMany({
     where: {
-      SubCategoryID: parseInt(params.id),
+      SubCategoryID: parseInt(id),
       ...(user.role !== "admin" ? { UserID: user.userId } : {}),
     },
     data: {
@@ -45,13 +47,14 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
   return NextResponse.json({ success: true });
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const user = getTokenFromRequest(req);
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
+  const { id } = await params;
   await prisma.sub_categories.deleteMany({
     where: {
-      SubCategoryID: parseInt(params.id),
+      SubCategoryID: parseInt(id),
       ...(user.role !== "admin" ? { UserID: user.userId } : {}),
     },
   });

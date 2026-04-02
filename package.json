@@ -22,6 +22,7 @@
     "clsx": "^2.1.1",
     "dotenv": "^17.2.3",
     "formidable": "^3.5.4",
+    "jose": "^6.2.2",
     "jsonwebtoken": "^9.0.3",
     "jspdf": "^4.2.0",
     "jspdf-autotable": "^5.0.7",

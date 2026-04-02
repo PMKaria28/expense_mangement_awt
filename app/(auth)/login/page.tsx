@@ -20,8 +20,11 @@ export default function LoginPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
       
+      // Store token in both localStorage (client reads) and cookie (middleware reads)
       localStorage.setItem("auth-token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));
+      document.cookie = `auth-token=${data.token}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`;
+      
       toast.success(`Welcome back, ${data.user.name}!`);
       router.push("/dashboard");
     } catch (err: any) {

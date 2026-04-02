@@ -11,7 +11,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     const all = await prisma.incomes.findMany({
       include: { categories: true, sub_categories: true, peoples: true, projects: true },
     });
-    const income = all.find((i) => i.IncomeID === parseInt(params.id));
+    const income = all.find((i) => i.IncomeID === parseInt(id));
     if (!income) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
     if (user.role !== "admin" && income.UserID !== user.userId) {

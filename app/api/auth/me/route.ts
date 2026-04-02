@@ -1,5 +1,5 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
-export const GET = () => {
+export async function GET(req: NextRequest) {
   return NextResponse.json({ error: "Not implemented" }, { status: 501 });
-};
+}

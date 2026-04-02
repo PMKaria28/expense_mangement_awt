@@ -33,7 +33,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
 
     const body = await req.json();
     await prisma.categories.update({
-      where: { CategoryID: parseInt(params.id) },
+      where: { CategoryID: parseInt(id) },
       data: {
         CategoryName: body.CategoryName,
         LogoPath: body.LogoPath || null,
@@ -52,7 +52,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
   }
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const user = getTokenFromRequest(req);
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
@@ -62,7 +62,8 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
   }
 
   try {
-    await prisma.categories.delete({ where: { CategoryID: parseInt(params.id) } });
+    const { id } = await params;
+    await prisma.categories.delete({ where: { CategoryID: parseInt(id) } });
     return NextResponse.json({ success: true });
   } catch (err: any) {
     return NextResponse.json({ error: "Server error" }, { status: 500 });

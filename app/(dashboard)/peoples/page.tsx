@@ -69,16 +69,18 @@ export default function PeoplesPage() {
           <h1 className="text-2xl font-bold text-slate-800">Peoples</h1>
           <p className="text-slate-500 text-sm">{total} total people</p>
         </div>
-        <button onClick={() => { resetForm(); setEditItem(null); setShowForm(true); }}
-          className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-500 text-white text-sm font-medium rounded-xl hover:from-blue-500 hover:to-blue-400 transition shadow-md shadow-blue-500/20">
-          <Plus className="w-4 h-4" /> Add Person
-        </button>
+        {isAdmin && (
+          <button onClick={() => { resetForm(); setEditItem(null); setShowForm(true); }}
+            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-500 text-white text-sm font-medium rounded-xl hover:from-blue-500 hover:to-blue-400 transition shadow-md shadow-blue-500/20">
+            <Plus className="w-4 h-4" /> Add Person
+          </button>
+        )}
       </div>
 
       {!isAdmin && (
         <div className="flex items-center gap-2 px-4 py-2.5 bg-amber-50 border border-amber-200 rounded-xl text-amber-700 text-sm">
           <Lock className="w-4 h-4" />
-          Only admin can delete people.
+          You have view-only access. Only admin can add, edit or delete people.
         </div>
       )}
 
@@ -114,10 +116,16 @@ export default function PeoplesPage() {
               </div>
             </div>
             <div className="flex gap-2 pt-3 border-t border-slate-100">
-              <button onClick={() => openEdit(p)}
-                className="flex-1 flex items-center justify-center gap-1.5 py-1.5 text-xs text-blue-600 hover:bg-blue-50 rounded-lg transition font-medium">
-                <Pencil className="w-3.5 h-3.5" /> Edit
-              </button>
+              {isAdmin ? (
+                <button onClick={() => openEdit(p)}
+                  className="flex-1 flex items-center justify-center gap-1.5 py-1.5 text-xs text-blue-600 hover:bg-blue-50 rounded-lg transition font-medium">
+                  <Pencil className="w-3.5 h-3.5" /> Edit
+                </button>
+              ) : (
+                <span className="flex-1 flex items-center justify-center gap-1.5 py-1.5 text-xs text-slate-300 rounded-lg font-medium cursor-not-allowed" title="Only admin can edit">
+                  <Lock className="w-3.5 h-3.5" /> Edit
+                </span>
+              )}
               {isAdmin ? (
                 <button onClick={() => handleDelete(p.PeopleID)}
                   className="flex-1 flex items-center justify-center gap-1.5 py-1.5 text-xs text-red-500 hover:bg-red-50 rounded-lg transition font-medium">

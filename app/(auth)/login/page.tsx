@@ -87,7 +87,7 @@ export default function LoginPage() {
             <div className="bg-white/5 border border-white/10 rounded-xl p-3 text-xs text-blue-200/60">
               <span className="font-medium text-blue-200/80">Test Credentials:</span>
               <br />Admin: admin@example.com / admin123
-              <br />User: staff@example.com / staff123
+              <br />User: parvakaria28@gmail.com / parva123
             </div>
 
             <button

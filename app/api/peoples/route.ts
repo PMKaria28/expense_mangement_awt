@@ -13,7 +13,7 @@ export async function GET(req: NextRequest) {
     const allPeoples = await prisma.peoples.findMany();
 
     const peoples = allPeoples.filter((p) => {
-      if (user.role !== "admin" && p.UserID !== user.userId) return false;
+      // All authenticated users can view all peoples; add/edit/delete is admin-only via UI
       if (search) {
         const s = search.toLowerCase();
         return (
